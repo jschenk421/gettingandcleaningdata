@@ -55,17 +55,22 @@ features<-read.table("features.txt")
 colnames<-as.vector(features[,2])
 
 # Convert to lower case
-title<-c("subject","activity",colnames)
-
 # Set the column names
+title<-c("subject","activity",colnames)
 names(rawset)<-tolower(title)
 
-# Select the columns that have mean or std in the name
-# plus the action and subject columns
+# a. Select the columns that have mean or std in the name
+#    plus the action and subject columns
+# b. Angle and meanfreq are different measures. Remove them.
+# c. f-type columns are derived from t-type. They are redundant and
+#    can be removed
 smallset<-rawset[,grep("subject|activity|mean|std", names(rawset)) ]
+smallerset<-smallset[,-grep("angle|meanfreq", names(smallset)) ]
+smallestset<-smallerset[,-grep("^f", names(smallerset)) ]
+
 
 # Remove redundant files from memory
-rm(title); rm(colnames);rm(features);rm(rawset)
+rm(title); rm(colnames);rm(features);rm(rawset);rm(smallset);rm(smallerset)
 
 
 ################################################################################
@@ -81,13 +86,13 @@ activity<-read.table("activity_labels.txt")
 names(activity)<-c("activity_id","activity")
 
 # Merge activities and test data
-niceset<-merge(activity,smallset,by.x="activity_id",by.y="activity")
+niceset<-merge(activity,smallestset,by.x="activity_id",by.y="activity")
 
 # Remove redundant activity_id column
 resultset<-select(niceset,-activity_id)
 
 # Remove redundant files from memory
-rm(activity); rm(niceset);rm(smallset)
+rm(activity); rm(niceset);rm(smallestset)
 
 
 
@@ -97,4 +102,25 @@ rm(activity); rm(niceset);rm(smallset)
 #                                                                              #
 ################################################################################
 
+# In part 2 the columnames were converted to lower case. There is in my opinion
+# no valid conversion that can convert them into better understandable names 
+# that obey the rules of tidyness. So I left them the way they are.
 
+
+################################################################################
+#                                                                              #
+#                                 Part 5                                       #
+#                                                                              #
+################################################################################
+
+# Create the data directory if it doesn't exist yet.
+if (!file.exists("data")) {
+        dir.create("data")
+}
+
+# Write the result to file
+# <TBD> Write the correct file
+write.table(resultset,file.path("data","tidy.txt"),row.names=FALSE)
+
+# Remove redundant files from memory
+rm(resultset)
