@@ -28,7 +28,9 @@ obey the rules of tidyness. So I left them the way they are.
 
 <ins>The tidy data:</ins>
 The tidy data is in the file **tidy.txt** and has the average of each variable for 
-each activity and each subject.
+each activity and each subject. That is for all 30 individuals per activity the
+mean of all observations on all variables is given. Resulting in 30 times 6 = 180
+mean values.
 
 The subjects have been deidentified and are numbered 1 through 30.
 
