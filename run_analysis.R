@@ -11,6 +11,7 @@
 #    each subject.
 
 
+library("dplyr")
 
 
 ################################################################################
@@ -25,7 +26,7 @@ observations<-read.table("X_train.txt")
 actions<-read.table("y_train.txt")
 persons<-read.table("subject_train.txt")
 
-# Merge trainingt files
+# Merge training files
 trainingset<-cbind(persons,actions,observations)
 
 # Read test files
@@ -54,14 +55,14 @@ features<-read.table("features.txt")
 colnames<-as.vector(features[,2])
 
 # Convert to lower case
-title<-c("subject","action",colnames)
+title<-c("subject","activity",colnames)
 
 # Set the column names
 names(rawset)<-tolower(title)
 
 # Select the columns that have mean or std in the name
 # plus the action and subject columns
-smallset<-rawset[,grep("subject|action|mean|std", names(rawset)) ]
+smallset<-rawset[,grep("subject|activity|mean|std", names(rawset)) ]
 
 # Remove redundant files from memory
 rm(title); rm(colnames);rm(features);rm(rawset)
@@ -70,6 +71,29 @@ rm(title); rm(colnames);rm(features);rm(rawset)
 ################################################################################
 #                                                                              #
 #                                 Part 3                                       #
+#                                                                              #
+################################################################################
+
+# Read activities
+activity<-read.table("activity_labels.txt")
+
+# Label the columns
+names(activity)<-c("activity_id","activity")
+
+# Merge activities and test data
+niceset<-merge(activity,smallset,by.x="activity_id",by.y="activity")
+
+# Remove redundant activity_id column
+resultset<-select(niceset,-activity_id)
+
+# Remove redundant files from memory
+rm(activity); rm(niceset);rm(smallset)
+
+
+
+################################################################################
+#                                                                              #
+#                                 Part 4                                       #
 #                                                                              #
 ################################################################################
 
