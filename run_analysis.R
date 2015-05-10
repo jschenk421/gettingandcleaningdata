@@ -40,7 +40,7 @@ testset<-cbind(persons,actions,observations)
 # Merge test set and training set
 rawset<-rbind(testset,trainingset)
 
-# Remove redundant files from memory
+# Remove redundant objects from memory
 rm(actions); rm(observations);rm(persons);rm(testset);rm(trainingset)
 
 
@@ -69,7 +69,7 @@ smallerset<-smallset[,-grep("angle|meanfreq", names(smallset)) ]
 smallestset<-smallerset[,-grep("^f", names(smallerset)) ]
 
 
-# Remove redundant files from memory
+# Remove redundant objects from memory
 rm(title); rm(colnames);rm(features);rm(rawset);rm(smallset);rm(smallerset)
 
 
@@ -91,7 +91,7 @@ niceset<-merge(activity,smallestset,by.x="activity_id",by.y="activity")
 # Remove redundant activity_id column
 resultset<-select(niceset,-activity_id)
 
-# Remove redundant files from memory
+# Remove redundant objects from memory
 rm(activity); rm(niceset);rm(smallestset)
 
 
@@ -104,7 +104,9 @@ rm(activity); rm(niceset);rm(smallestset)
 
 # In part 2 the columnames were converted to lower case. There is in my opinion
 # no valid conversion that can convert them into better understandable names 
-# that obey the rules of tidyness. So I left them the way they are.
+# that obey the rules of tidyness. So I left them the way they are. However
+# in case the colnames have to be referred to, they must be renamed because 
+# R can not handle the reserved word mean and the minus sign in the name.
 
 
 ################################################################################
@@ -118,9 +120,20 @@ if (!file.exists("data")) {
         dir.create("data")
 }
 
-# Write the result to file
-# <TBD> Write the correct file
-write.table(resultset,file.path("data","tidy.txt"),row.names=FALSE)
 
-# Remove redundant files from memory
-rm(resultset)
+# Subset the matrix with the observations. That way we can use rowMeans.
+matr<-as.matrix(resultset[,3:42])
+rowmeans<-rowMeans(matr)
+
+# Add the rowmeans to the full dataframe
+extendedresultset <- cbind(resultset,rowmeans)
+
+#Group by and summarize
+extendedresultset<-group_by(extendedresultset,subject,activity)
+finalresult<-summarize(extendedresultset,value=mean(rowmeans))
+
+# Write the result to file
+write.table(finalresult,file.path("data","tidy.txt"),row.names=FALSE)
+
+# Remove redundant objects from memory
+rm(resultset);rm(extendedresultset);rm(matr);rm(rowmeans);rm(finalresult)
